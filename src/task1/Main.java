@@ -34,6 +34,34 @@ public class Main {
             return new ArrayResult(result, Thread.currentThread().getName());
         });
 
+        CompletableFuture<String> createIcon1 = CompletableFuture.supplyAsync(()->{
+            String art = """
+            ⠄⠄⠄⠄⠄⠄⠄⢀⣀⣠⣤⠴⠶⠶⠶⠶⠶⠶⠶⢤⣄⣀⡀⠄⠄⠄⠄⠄⠄⠄
+            ⠄⠄⠄⠄⠄⣠⣶⠟⠋⠁⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠉⠙⠶⣄⡀⠄⠄⠄⠄
+            ⠄⠄⠄⣠⡾⠟⠁⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠈⠻⣆⠄⠄⠄
+            ⠄⠄⣼⡟⠄⠄⠄⠄⠄⠄⠄⢀⣤⣶⡶⢦⡀⠄⠄⠄⠄⠄⠄⠖⠻⣶⠞⢧⠄⠄
+            ⠄⣼⠏⠄⠄⠄⠄⠄⠄⠄⠐⠛⠋⠁⠄⠄⠄⠄⠄⠄⠄⢀⣤⣤⣄⠄⠄⠨⣧⠄
+            ⢸⡏⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠙⡏⠄⠄⠄⠸⡇
+            ⣿⠁⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⡄⠄⠰⠄⠄⠄⠄⠄⢀⡇⠄⢀⡘⢣⣿
+            """;
+            return art;
+        });
+        CompletableFuture<String> createIcon2 = CompletableFuture.supplyAsync(()->{
+            String art = """
+            ⡿⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠠⣄⠄⠄⠦⠄⢀⣠⣤⣶⣿⠿⣶⣦⣴⠟⢹
+            ⢿⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠉⠛⠛⠛⠛⠉⠁⠄⠄⠄⠄⠜⠁⠄⣾
+            ⠈⢧⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⢰⠇
+            ⠄⠈⠑⢄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⢀⡴⠋⠄
+            ⠄⠄⠄⠄⠐⠄⡀⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⢀⣠⡴⠏⠄⠄⠄
+            ⠄⠄⠄⠄⠄⠄⠄⠄⠐⠂⠤⠤⣄⣀⣀⣀⣠⣤⣤⣤⡶⠶⠟⠋⠁⠄⠄⠄⠄⠄
+            """;
+            return art;
+        });
+
+        CompletableFuture<String> createTotalIcon = createIcon1.thenCombine(createIcon2, (part1, part2) ->{
+            return part1 + part2;
+        });
+
         CompletableFuture<ArrayResult> generateArray3 = CompletableFuture.supplyAsync(() -> {
 
 
@@ -49,12 +77,23 @@ public class Main {
         });
 
         CompletableFuture<Object> firstArray = CompletableFuture.anyOf(generateArray1, generateArray2, generateArray3);
-        firstArray.thenAccept(result ->{
-            ArrayResult taskResult = (ArrayResult) result;
-            System.out.println("Тюлень з геніальною ідеєю: " + taskResult.threadName);
-            System.out.println("Ідея: " + taskResult.idea);
+
+        CompletableFuture<Void> allTasks = CompletableFuture.allOf(firstArray, createTotalIcon);
+        allTasks.thenRun(() -> {
+            firstArray.thenCompose(result -> {
+                ArrayResult taskResult = (ArrayResult) result;
+                String modifiedIdea = "Тюлень з геніальною ідеєю: " + taskResult.threadName + "\nІдея: " + taskResult.idea;
+                return CompletableFuture.completedFuture(modifiedIdea);
+            }).thenAccept(modifiedIdea -> {
+                System.out.println(modifiedIdea);
+                createTotalIcon.thenAccept(icon -> {
+                    System.out.println(icon);
+                });
+            });
         }).join();
     }
+
+
 
 
     static String kaiserSheiseIdeeGenerator() throws InterruptedException {
