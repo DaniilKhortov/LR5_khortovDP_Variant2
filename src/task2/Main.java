@@ -18,7 +18,7 @@ public class Main {
                 Ticket t1 = new Ticket("Ticket-"+ticketList.size()+"-1", statusList[kaiserRandom.nextInt(statusList.length)],kaiserRandom.nextInt(5)*1000+999);
                 ticketList.add(t1);
             }
-        return ticketList;
+            return ticketList;
         });
         CompletableFuture<CopyOnWriteArrayList> generateTicket2 = CompletableFuture.supplyAsync(() -> {
             CopyOnWriteArrayList ticketList = new CopyOnWriteArrayList();
@@ -171,11 +171,26 @@ public class Main {
 
 
         bestPriceText.thenAccept(result -> {
-               System.out.println(result);
+                    System.out.println(result);
+                    System.out.println("-----------------------------------");
+                    System.out.println("Book a ticket? [y/n]");
+                    Scanner input = new Scanner(System.in);
 
-           }
+                    boolean continueVar = true;
+                    while (continueVar) {
+                        String option = input.nextLine();
+                        if (option.equals("y")) {
+                            continueVar = false;
+                            System.out.println("Ticked Booked!");
+                        } else if (option.equals("n")) {
+                            System.exit(0);
+                        } else {
+                            System.out.println("Undefined option...");
+                        }
+                    }
+                }
 
-           ).join();
+        ).join();
 
         CompletableFuture<Void> text = CompletableFuture.allOf(generateLine1, generateLine2);
 
